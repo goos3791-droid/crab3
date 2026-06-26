@@ -2,86 +2,401 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 첫 홈페이지</title>
+    <title>아이템 툴팁 시뮬레이터 v3.5 (공유 기능)</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        header {
-            background-color: #4A90E2;
-            color: white;
-            text-align: center;
-            padding: 2rem 1rem;
-        }
-        main {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .intro {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-        .feature-box {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border-top: 4px solid #4A90E2;
-        }
-        footer {
-            text-align: center;
-            padding: 2rem 1rem;
-            color: #777;
-            font-size: 0.9rem;
-        }
+        :root { --bg: #121212; --card-bg: #1e1e1e; --accent: #ffcc00; --text: #ffffff; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; gap: 20px; }
+        .config-panel { width: 480px; background: var(--card-bg); padding: 20px; border-radius: 10px; height: 92vh; overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        h2 { border-bottom: 2px solid #444; padding-bottom: 10px; color: var(--accent); margin-top: 0; }
+        .input-group { margin-bottom: 15px; border: 1px solid #333; padding: 12px; border-radius: 5px; background: #252525; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; background: #151515; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        input[type="range"] { padding: 0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #e6b800; }
+        .btn-secondary { background: #444; color: #fff; margin-top: 5px; }
+        .btn-secondary:hover { background: #555; }
+        .preview-panel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; border-radius: 10px; height: 92vh; position: relative; }
+        canvas { background: #1c1c1c; border: 2px solid #333; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+        .share-url { margin-top: 15px; width: 340px; background: #222; padding: 10px; border-radius: 5px; border: 1px solid #444; font-size: 12px; word-break: break-all; color: #00ffcc; text-align: center; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>나의 첫 홈페이지에 오신 것을 환영합니다!</h1>
-    </header>
+    <div class="config-panel">
+        <h2>🔧 시뮬레이터 설정</h2>
+        
+        <div class="input-group">
+            <label>기본 아이템 선택</label>
+            <select id="itemPreset" onchange="loadPreset()"></select>
+        </div>
 
-    <main>
-        <section class="intro">
-            <h2>안녕하세요! 👋</h2>
-            <p>이곳은 제가 처음으로 직접 만든 HTML 홈페이지입니다. 메모장에 적어두었던 소중한 데이터들과 아이디어를 바탕으로 한 땀 한 땀 구성해 보았습니다. 앞으로 이 공간을 저만의 멋진 이야기들로 가득 채워나갈 예정입니다.</p>
-        </section>
+        <div class="input-group">
+            <label>아이템 이름 커스텀</label>
+            <input type="text" id="customName" oninput="draw()">
+        </div>
 
-        <section class="features">
-            <div class="feature-box">
-                <h3>💡 주요 특징 1</h3>
-                <p>GitHub Pages를 통해 전 세계 어디서나 접속할 수 있는 완벽한 라이브 웹사이트입니다.</p>
+        <div class="grid-2">
+            <div class="input-group">
+                <label>아이템 종류</label>
+                <select id="partType" onchange="updateEnchantOptions(); draw();">
+                    <option value="무기류">무기류</option>
+                    <option value="투구류">투구류</option>
+                    <option value="갑옷류">갑옷류</option>
+                    <option value="토템류">토템류</option>
+                    <option value="장갑">장갑</option>
+                    <option value="팔찌/부적">팔찌/부적</option>
+                    <option value="목걸이">목걸이</option>
+                    <option value="반지">반지</option>
+                    <option value="귀걸이">귀걸이</option>
+                </select>
             </div>
-            <div class="feature-box">
-                <h3>⚡ 주요 특징 2</h3>
-                <p>깔끔하고 직관적인 레이아웃을 적용하여 방문자가 정보를 한눈에 읽기 편하도록 제작했습니다.</p>
+            <div class="input-group">
+                <label>아이템 등급</label>
+                <select id="gradeSelect" onchange="draw()"></select>
             </div>
-            <div class="feature-box">
-                <h3>🎨 주요 특징 3</h3>
-                <p>모바일과 컴퓨터 화면 모두에서 예쁘게 깨지지 않고 잘 보이는 반응형 기초 설계를 더했습니다.</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="input-group">
+                <label>강화 수치</label>
+                <select id="enchantSelect" onchange="draw()"></select>
             </div>
-        </section>
-    </main>
+            <div class="input-group">
+                <label>아이템 이미지 URL</label>
+                <input type="text" id="imgUrl" placeholder="data:image/... 또는 URL" oninput="draw()">
+            </div>
+        </div>
 
-    <footer>
-        <p>&copy; 2026 나의 첫 홈페이지. All rights reserved.</p>
-    </footer>
+        <h2>📊 기본 능력치 수정 (프리셋 우회 가능)</h2>
+        <div class="grid-2" id="baseStatsContainer"></div>
 
+        <button class="btn" onclick="copyShareUrl()">🔗 공유 링크 복사하기</button>
+        <button class="btn btn-secondary" onclick="resetToPreset()">🔄 현재 프리셋 원본으로 리셋</button>
+    </div>
+
+    <div class="preview-panel">
+        <canvas id="tooltipCanvas" width="340" height="520"></canvas>
+        <div class="share-url" id="shareUrlText">공유 링크가 여기에 표시됩니다.</div>
+    </div>
+
+    <script>
+        // index.html.txt에서 합쳐진 순수 데이터 객체
+        const itemData = {
+            "grade": {
+                "노말": {"atk":0,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "고급": {"atk":1,"def":1,"agi":1,"hp":3,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "레어": {"atk":2,"def":2,"agi":2,"hp":6,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "유물": {"atk":3,"def":3,"agi":3,"hp":9,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "전설": {"atk":6,"def":6,"agi":6,"hp":18,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "초월": {"atk":10,"def":10,"agi":10,"hp":30,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "고대": {"atk":15,"def":15,"agi":15,"hp":45,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                "신화": {"atk":20,"def":20,"agi":20,"hp":60,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0}
+            },
+            "enchant": {
+                "무기류": {
+                    "1":{"atk":1,"def":0,"agi":1,"hp":0,"crit":0,"eva":0,"pen":2,"acc":0,"shd":0},
+                    "2":{"atk":2,"def":0,"agi":2,"hp":0,"crit":0,"eva":0,"pen":4,"acc":0,"shd":0},
+                    "3":{"atk":3,"def":0,"agi":3,"hp":0,"crit":0,"eva":0,"pen":6,"acc":0,"shd":0},
+                    "4":{"atk":5,"def":0,"agi":5,"hp":0,"crit":0,"eva":0,"pen":10,"acc":0,"shd":0},
+                    "5":{"atk":7,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":22,"acc":5,"shd":0},
+                    "6":{"atk":7,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":32,"acc":10,"shd":0},
+                    "7":{"atk":12,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":37,"acc":10,"shd":0},
+                    "8":{"atk":17,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":42,"acc":10,"shd":0},
+                    "9":{"atk":22,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":47,"acc":10,"shd":0},
+                    "10":{"atk":32,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":67,"acc":20,"shd":0}
+                },
+                "투구류": {
+                    "1":{"atk":0,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":1},
+                    "2":{"atk":0,"def":2,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":2},
+                    "3":{"atk":0,"def":3,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":3},
+                    "4":{"atk":0,"def":5,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":5},
+                    "5":{"atk":0,"def":7,"agi":0,"hp":0,"crit":5,"eva":0,"pen":0,"acc":0,"shd":11},
+                    "6":{"atk":0,"def":7,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":17},
+                    "7":{"atk":0,"def":12,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":23},
+                    "8":{"atk":0,"def":17,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":29},
+                    "9":{"atk":0,"def":22,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":35},
+                    "10":{"atk":0,"def":32,"agi":0,"hp":0,"crit":31,"eva":0,"pen":0,"acc":0,"shd":47}
+                },
+                "갑옷류": {
+                    "1":{"atk":0,"def":1,"agi":0,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":1},
+                    "2":{"atk":0,"def":2,"agi":0,"hp":8,"crit":0,"eva":0,"pen":0,"acc":0,"shd":2},
+                    "3":{"atk":0,"def":3,"agi":0,"hp":12,"crit":0,"eva":0,"pen":0,"acc":0,"shd":3},
+                    "4":{"atk":0,"def":5,"agi":0,"hp":20,"crit":0,"eva":0,"pen":0,"acc":0,"shd":5},
+                    "5":{"atk":0,"def":7,"agi":0,"hp":28,"crit":0,"eva":5,"pen":0,"acc":0,"shd":11},
+                    "6":{"atk":0,"def":7,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":17},
+                    "7":{"atk":0,"def":12,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":23},
+                    "8":{"atk":0,"def":17,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":29},
+                    "9":{"atk":0,"def":22,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":35},
+                    "10":{"atk":0,"def":32,"agi":0,"hp":28,"crit":0,"eva":31,"pen":0,"acc":0,"shd":47}
+                },
+                "토템류": {
+                    "1":{"atk":1,"def":1,"agi":1,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "2":{"atk":2,"def":2,"agi":2,"hp":8,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "3":{"atk":3,"def":3,"agi":3,"hp":12,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "4":{"atk":4,"def":4,"agi":4,"hp":16,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "5":{"atk":6,"def":6,"agi":6,"hp":24,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "6":{"atk":6,"def":6,"agi":6,"hp":24,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "7":{"atk":7,"def":7,"agi":7,"hp":28,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "8":{"atk":9,"def":9,"agi":9,"hp":36,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "9":{"atk":11,"def":11,"agi":11,"hp":44,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "10":{"atk":18,"def":18,"agi":18,"hp":72,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2}
+                },
+                "장갑": {
+                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":0,"pen":0,"acc":5,"shd":0},
+                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
+                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
+                    "8":{"atk":7,"def":7,"agi":7,"hp":24,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
+                    "9":{"atk":9,"def":9,"agi":9,"hp":32,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
+                    "10":{"atk":12,"def":12,"agi":12,"hp":50,"crit":1,"eva":1,"pen":2,"acc":11,"shd":2}
+                },
+                "팔찌/부적": {
+                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":0,"pen":3,"acc":0,"shd":3},
+                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
+                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
+                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
+                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
+                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":1,"eva":1,"pen":8,"acc":1,"shd":5}
+                },
+                "목걸이": {
+                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":0,"pen":0,"acc":2,"shd":0},
+                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
+                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
+                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
+                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
+                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":1,"eva":1,"pen":2,"acc":5,"shd":2}
+                },
+                "반지": {
+                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":2,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
+                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":5,"eva":1,"pen":2,"acc":1,"shd":2}
+                },
+                "귀걸이": {
+                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
+                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":2,"pen":0,"acc":0,"shd":0},
+                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
+                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
+                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
+                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
+                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":1,"eva":5,"pen":2,"acc":1,"shd":2}
+                }
+            },
+            "base": {
+                "느림의미학": {"atk":0,"def":0,"agi":-300,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0,"customName":"느림의미학","partType":"토템류","img":"data:image/png;base64,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하게 만들어진 시뮬레이터입니다."},
+                "데모니오의 활": {"atk":40,"def":-10,"agi":-5,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0,"customName":"데모니오의 활","partType":"무기류","img":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAABCCAYAAAABiBuRAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAA8gSURBVHhe7Zp7cFPXncc/kq9kyXrYliy/ZMu27MhOwA4FQlJ7WQjQEDJpE4rpppvOhrYztJ2GdLbdbLbb2U32j23LpslsmuxsNrNZAtN0mxBCklIWSALkQQKEBIJhg2XZso1syW9btpGsh7V/XOlaTwMhOGaH79gj7jnnXvl8+J3f+f1+58rKzCURGTJkMpAhI/oDMhkw0yb+W2yPXootM91JfWn6kySLfsd8kzy54bquQ0mrK4Li6OzC4exKbr7m9bmhODq7GRr8LR/s/Hva/p+B+VxQYkAAam8vZvujzQlgdq3vjBt97SkFyq7zPclNadV6yEPrIQ97nn6X8e4+VteW0NYhwqh/Inn0taUUKBvKzclNKaqptNC48Zc0bvwlni43rZ7R5CHXtCQor7p64TIsBeDsW48B0DPahRolAPaOTohExM9rVBKUb5aVJvZcgowLfGhkcv6p0cue1qhPiUSkT3uHE3u7k1fudSbcN9+VsHx2uXouafnENHRWTatnlD923szWby0SG2NRqkyGzVqFrbqK5teqEu6b70pZPpejsqX1lBXpOdErWoL9VzaxQybDZq1MHHwNKcFSNpRdupXE9JXlSwgM5/PIy6fAGwfmGlbK8onplW5XfFdGmSsMGAuzAbD9yg46aPlZ1OFeo5ID7O7pZUlyzyVKrTei14pQbrBWYnvQTv0TYN9hw96R2cH+vj1z35ctOcASYNXtt0tgXjnfQ7OlLHFkGoVCPfi8QyxdVisFbzZrpfj7V3bsz9iwp5n879udLIlEeNHRkdw1LyQtH6VSjDMuRxO9KowLfJRYSsk1TCb02aJWY99hozUJzF9WV/GxTMb9NdaE9vmilIh21/kemtNsy683n0+4rqm0UNGwGYXCjFav5UazjQeW2xJ8ic1aJVpMBjDzVRIUv9/PnWvXZvQt97xSntwEgOfUMObaSlasa0SvzWbLuvpEMNWZwcxXpVjKyhUrcMaF+q9vFC2ko0v8fG1Dt9RXU1nBgjWPkWcxUnvLQvQa0eEmqzYG5jURzHyHkwJFqVSKYLpdvLHRxT07y0UgkQjtXee5d5eF3fFgqirIzdtAnsVI+bJF6DXZrK4tSdmSa6ursN0rgonBma9KgOL3+5HL5cjlclauWEH9E9DRLQIBMZ9p7+xm/S5L/G2Svr15HaXmAm6rN0f9S+LEY2AA7G/bODefdx+LuZTD77wDgEKh4KnFh+hytosjYkBiikRwdIqWsnuDmATeELUWgLu//01KzQWsWtXAL5qXpmzJEphx6O6+f16CSVk+AA+fWUtFVTV3rl07k+DFJJNRUylayvpdFVJzDIy21M/Nt+ShzdXxWY+d1bUlKUslBsbf9tGsYDblXFpU/UUrBUowGCQnJweVSsXjC/cngpHJqK5M9CkxtTm7uMFaibHgIW68s5GiQh83mm1SnSVZtdVV2FbbsVhexON+JC2Yh63B5KY5UQqUmHJycnj4zFoeX7if2269VQLz2oZUn9Lm7KLCYpHKkZ5Tw5Q3rMK2oJIqq54t6+tJim으로 강력한 힘을 자랑하는 아이템입니다."}
+            }
+        };
+
+        const statKeys = ["atk", "def", "agi", "hp", "crit", "eva", "pen", "acc", "shd"];
+        const statNames = ["공격력", "방어력", "민첩", "체력", "크리티컬", "회피율", "방어관통", "명중률", "보호막"];
+        const gradeColors = { "노말": "#b0b0b0", "고급": "#1eff00", "레어": "#0070dd", "유물": "#a335ee", "전설": "#ff8000", "초월": "#e6cc80", "고대": "#ffcc00", "신화": "#ff0044" };
+
+        const canvas = document.getElementById("tooltipCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // 초기화 함수
+        window.onload = function() {
+            // 등급 셀렉트 세팅
+            const gradeSelect = document.getElementById("gradeSelect");
+            Object.keys(itemData.grade).forEach(g => {
+                let opt = document.createElement("option"); opt.value = g; opt.textContent = g;
+                gradeSelect.appendChild(opt);
+            });
+            gradeSelect.value = "신화";
+
+            // 프리셋 셀렉트 세팅
+            const presetSelect = document.getElementById("itemPreset");
+            Object.keys(itemData.base).forEach(k => {
+                let opt = document.createElement("option"); opt.value = k; opt.textContent = k;
+                presetSelect.appendChild(opt);
+            });
+
+            // 스탯 컨트롤러 생성
+            const container = document.getElementById("baseStatsContainer");
+            statKeys.forEach((s, i) => {
+                container.innerHTML += `
+                    <div class="input-group">
+                        <label>${statNames[i]} (${s.toUpperCase()})</label>
+                        <input type="number" id="base_${s}" value="0" oninput="draw()">
+                    </div>`;
+            });
+
+            // URL 파라미터 확인 및 로드
+            if(!loadFromUrl()) {
+                presetSelect.value = "느림의미학";
+                loadPreset();
+            }
+        };
+
+        function updateEnchantOptions() {
+            const pType = document.getElementById("partType").value;
+            const enchSelect = document.getElementById("enchantSelect");
+            enchSelect.innerHTML = '<option value="0">+0 강화</option>';
+            if(itemData.enchant[pType]) {
+                Object.keys(itemData.enchant[pType]).forEach(lvl => {
+                    let opt = document.createElement("option"); opt.value = lvl; opt.textContent = `+${lvl} 강화`;
+                    enchSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function loadPreset() {
+            const pName = document.getElementById("itemPreset").value;
+            const item = itemData.base[pName];
+            if(!item) return;
+
+            document.getElementById("customName").value = item.customName;
+            document.getElementById("partType").value = item.partType;
+            document.getElementById("imgUrl").value = item.img || "";
+            
+            statKeys.forEach(s => {
+                document.getElementById(`base_${s}`).value = item[s] || 0;
+            });
+
+            updateEnchantOptions();
+            document.getElementById("enchantSelect").value = "0";
+            draw();
+        }
+
+        function resetToPreset() {
+            loadPreset();
+        }
+
+        function getActiveSpecs() {
+            const pType = document.getElementById("partType").value;
+            const gKey = document.getElementById("gradeSelect").value;
+            const eKey = document.getElementById("enchantSelect").value;
+
+            const base = { customName: document.getElementById("customName").value, partType: pType, img: document.getElementById("imgUrl").value };
+            statKeys.forEach(s => { base[s] = parseInt(document.getElementById(`base_${s}`).value) || 0; });
+
+            const grade = itemData.grade[gKey] || {};
+            const ench = (itemData.enchant[pType] && itemData.enchant[pType][eKey]) ? itemData.enchant[pType][eKey] : {};
+
+            return { base, grade, ench, gKey, eKey, gColor: gradeColors[gKey] || "#fff" };
+        }
+
+        function draw() {
+            const { base, grade, ench, gKey, eKey, gColor } = getActiveSpecs();
+            
+            // 배경 그리기
+            ctx.fillStyle = "#1e1e1e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 3; ctx.strokeStyle = gColor; ctx.strokeRect(5, 5, canvas.width-10, canvas.height-10);
+
+            // 아이템 테두리 박스 및 이미지
+            ctx.strokeStyle = "#444"; ctx.lineWidth = 2; ctx.strokeRect(canvas.width/2-50, 25, 100, 100);
+            if(base.img) {
+                let img = new Image();
+                img.src = base.img;
+                img.onload = () => ctx.drawImage(img, canvas.width/2-45, 30, 90, 90);
+            }
+
+            // 텍스트 출력
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 20px Malgun Gothic";
+            ctx.fillText(`${base.customName} [+${eKey}]`, canvas.width/2, 160);
+            ctx.font = "16px Malgun Gothic"; ctx.fillStyle = "#cfcfcf";
+            ctx.fillText(`종류 : ${base.partType}`, canvas.width/2, 190);
+            ctx.fillStyle = gColor; ctx.font = "bold 18px Malgun Gothic";
+            ctx.fillText(`${gKey} 등급`, canvas.width/2, 215);
+
+            // 구분선
+            ctx.strokeStyle = "#333"; ctx.beginPath(); ctx.moveTo(30, 230); ctx.lineTo(310, 230); ctx.stroke();
+
+            // 능력치 출력
+            ctx.textAlign = "left"; ctx.font = "bold 15px Malgun Gothic";
+            let y = 265;
+            statKeys.forEach((s, i) => {
+                const bVal = base[s] || 0;
+                const gVal = grade[s] || 0;
+                const eVal = ench[s] || 0;
+                const total = bVal + gVal + eVal;
+
+                if(total !== 0 || bVal !== 0) {
+                    ctx.fillStyle = "#ffffff"; ctx.fillText(statNames[i], 50, y);
+                    ctx.textAlign = "right";
+                    
+                    // 총합 능력치 수치
+                    ctx.fillStyle = varColor(total);
+                    ctx.fillText(total > 0 ? `+${total}` : total, 290, y);
+                    
+                    // 상세 정보 주석 추가 (기본 + 등급 + 강화)
+                    ctx.font = "11px Malgun Gothic"; ctx.fillStyle = "#888";
+                    ctx.fillText(`(${bVal}익+${gVal}급+${eVal}강)`, 230, y-1);
+                    ctx.font = "bold 15px Malgun Gothic"; ctx.textAlign = "left";
+                    y += 24;
+                }
+            });
+
+            updateShareUrl();
+        }
+
+        function varColor(val) { return val > 0 ? "#00ffcc" : (val < 0 ? "#ff4444" : "#fff"); }
+
+        // 공유 링크 생성 기능
+        function updateShareUrl() {
+            const { base, gKey, eKey } = getActiveSpecs();
+            const state = { n: base.customName, t: base.partType, g: gKey, e: eKey, i: base.img.startsWith("data:") ? "" : base.img };
+            statKeys.forEach(s => { state[s] = base[s]; });
+            
+            const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?item=${encoded}`;
+            document.getElementById("shareUrlText").textContent = shareUrl;
+        }
+
+        function copyShareUrl() {
+            const url = document.getElementById("shareUrlText").textContent;
+            navigator.clipboard.writeText(url).then(() => alert("공유 링크가 클립보드에 복사되었습니다!"));
+        }
+
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const itemParam = params.get("item");
+            if(!itemParam) return false;
+
+            try {
+                const decoded = JSON.parse(decodeURIComponent(atob(itemParam)));
+                document.getElementById("customName").value = decoded.n || "";
+                document.getElementById("partType").value = decoded.t || "무기류";
+                document.getElementById("gradeSelect").value = decoded.g || "노말";
+                document.getElementById("imgUrl").value = decoded.i || "";
+                
+                updateEnchantOptions();
+                document.getElementById("enchantSelect").value = decoded.e || "0";
+
+                statKeys.forEach(s => {
+                    document.getElementById(`base_${s}`).value = decoded[s] || 0;
+                });
+                draw();
+                return true;
+            } catch(e) {
+                console.error("파라미터 로드 실패", e);
+                return false;
+            }
+        }
+    </script>
 </body>
 </html>
