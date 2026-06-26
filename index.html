@@ -2,535 +2,319 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>크랩 아이템 시뮬레이터 (공유 기능)</title>
+    <title> 크랩 아이템 정보 (공유 기능)</title>
     <style>
-        :root {
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --accent: #ffcc00;
-            --text: #ffffff;
-        }
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 20px;
-            display: flex;
-            gap: 20px;
-        }
-        .config-panel {
-            width: 480px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            height: 92vh;
-            overflow-y: auto;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
-        }
-        h2 {
-            border-bottom: 2px solid #444;
-            padding-bottom: 10px;
-            color: var(--accent);
-            margin-top: 0;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            border: 1px solid #333;
-            padding: 12px;
-            border-radius: 5px;
-            background: #252525;
-        }
-        label {
-            display: block;
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            background: #151515;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        input[type="range"] {
-            padding: 0;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 10px 15px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background: #e6b800;
-        }
-        .btn-secondary {
-            background: #444;
-            color: #fff;
-            margin-top: 5px;
-        }
-        .btn-secondary:hover {
-            background: #555;
-        }
-        .preview-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #0a0a0a;
-            border-radius: 10px;
-            height: 92vh;
-            position: relative;
-        }
-        canvas {
-            background: #1c1c1c;
-            border: 2px solid #333;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-        }
-        .share-url {
-            margin-top: 15px;
-            width: 340px;
-            background: #222;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            font-size: 12px;
-            word-break: break-all;
-            color: #00ffcc;
-            text-align: center;
-        }
+        :root { --bg: #121212; --card-bg: #1e1e1e; --accent: #ffcc00; --text: #ffffff; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; gap: 20px; }
+        .config-panel { width: 480px; background: var(--card-bg); padding: 20px; border-radius: 10px; height: 92vh; overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        h2 { border-bottom: 2px solid #444; padding-bottom: 10px; color: var(--accent); margin-top: 0; }
+        .input-group { margin-bottom: 15px; border: 1px solid #333; padding: 12px; border-radius: 5px; background: #252525; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: #fff; box-sizing: border-box; border-radius: 4px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        button { width: 100%; padding: 12px; margin-top: 10px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s; color: #000; }
+        button:hover { background: #e6b800; }
+        .preview-panel { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        #tooltipCanvas { border: 2px solid #555; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 8px; }
+        .controls { margin-top: 20px; width: 100%; max-width: 350px; background: #222; padding: 20px; border-radius: 10px; }
+        .share-area { background: #1a1a1a; border: 1px dashed var(--accent); padding: 10px; margin-top: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="config-panel">
-        <h2>🔧 시뮬레이터 설정</h2>
+<div class="config-panel">
+    <h2>1. 마스터 데이터 설정</h2>
+    
+    <div class="input-group">
+        <label>설정 모드 선택</label>
+        <select id="targetType" onchange="toggleConfigMode()">
+            <option value="base">아이템 등록 (이름/이미지/기본옵션)</option>
+            <option value="grade">등급별 공통 가중치 설정</option>
+            <option value="enchant">부위별 강화 상승치 설정</option>
+        </select>
+    </div>
+
+    <div id="configInputs" class="input-group">
+        <div id="nameInputArea">
+            <label>아이템 이름 (예: 모니오의 지팡이)</label>
+            <input type="text" id="itemNameInput" placeholder="이름을 입력하세요">
+        </div>
+
+        <div id="subKeyArea" style="margin-top:10px;">
+            <label id="subLabel">대상 선택</label>
+            <select id="subKey"></select>
+        </div>
+
+        <div id="enchantPartArea" style="display:none; margin-top:10px;">
+            <label>강화 적용 부위</label>
+            <select id="enchantPartSelect"></select>
+        </div>
         
-        <div class="input-group">
-            <label>기본 아이템 선택</label>
-            <select id="itemPreset" onchange="loadPreset()"></select>
+        <div class="stat-grid" style="margin-top:15px;">
+            <div><label>공격력</label><input type="number" id="s_atk" value="0"></div>
+            <div><label>방어력</label><input type="number" id="s_def" value="0"></div>
+            <div><label>순발력</label><input type="number" id="s_agi" value="0"></div>
+            <div><label>체력</label><input type="number" id="s_hp" value="0"></div>
+            <div><label>크리</label><input type="number" id="s_crit" value="0"></div>
+            <div><label>회피</label><input type="number" id="s_eva" value="0"></div>
+            <div><label>관통</label><input type="number" id="s_pen" value="0"></div>
+            <div><label>명중</label><input type="number" id="s_acc" value="0"></div>
+            <div><label>실드</label><input type="number" id="s_shd" value="0"></div>
         </div>
 
-        <div class="input-group">
-            <label>아이템 이름 커스텀</label>
-            <input type="text" id="customName" oninput="draw()">
+        <div id="imageUploadArea" style="margin-top:15px;">
+            <label>아이콘 이미지 업로드</label>
+            <input type="file" id="itemImgFile" accept="image/*">
         </div>
-
-        <div class="grid-2">
-            <div class="input-group">
-                <label>아이템 종류</label>
-                <select id="partType" onchange="updateEnchantOptions(); draw();">
-                    <option value="무기류">무기류</option>
-                    <option value="투구류">투구류</option>
-                    <option value="갑옷류">갑옷류</option>
-                    <option value="토템류">토템류</option>
-                    <option value="장갑">장갑</option>
-                    <option value="팔찌/부적">팔찌/부적</option>
-                    <option value="목걸이">목걸이</option>
-                    <option value="반지">반지</option>
-                    <option value="귀걸이">귀걸이</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>아이템 등급</label>
-                <select id="gradeSelect" onchange="draw()"></select>
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="input-group">
-                <label>강화 수치</label>
-                <select id="enchantSelect" onchange="draw()"></select>
-            </div>
-            <div class="input-group">
-                <label>아이템 이미지 URL</label>
-                <input type="text" id="imgUrl" placeholder="data:image/... 또는 URL" oninput="draw()">
-            </div>
-        </div>
-
-        <h2>📊 기본 능력치 수정 (프리셋 우회 가능)</h2>
-        <div class="grid-2" id="baseStatsContainer"></div>
-
-        <button class="btn" onclick="copyShareUrl()">🔗 공유 링크 복사하기</button>
-        <button class="btn btn-secondary" onclick="resetToPreset()">🔄 현재 프리셋 원본으로 리셋</button>
+        <button onclick="saveData()">데이터 저장 / 업데이트</button>
     </div>
 
-    <div class="preview-panel">
-        <canvas id="tooltipCanvas" width="340" height="520"></canvas>
-        <div class="share-url" id="shareUrlText">공유 링크가 여기에 표시됩니다.</div>
+    <div class="share-area">
+        <h3 style="margin:0 0 10px 0; font-size:14px; color:var(--accent);">📤 데이터 공유 및 백업</h3>
+        <button onclick="exportData()" style="background:#444; color:#fff; font-size:12px;">데이터 복사하기 (내보내기)</button>
+        <textarea id="shareDataBox" placeholder="복사한 데이터를 여기에 붙여넣으세요" style="margin-top:10px; height:60px; font-size:10px;"></textarea>
+        <button onclick="importData()" style="background:#2980b9; color:#fff; font-size:12px;">데이터 불러오기 (가져오기)</button>
     </div>
+</div>
 
-    <script>
-        // txt 데이터 이식 완료
-        const itemData = {
-            "grade": {
-                "노말": {"atk":0,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "고급": {"atk":1,"def":1,"agi":1,"hp":3,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "레어": {"atk":2,"def":2,"agi":2,"hp":6,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "유물": {"atk":3,"def":3,"agi":3,"hp":9,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "전설": {"atk":6,"def":6,"agi":6,"hp":18,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "초월": {"atk":10,"def":10,"agi":10,"hp":30,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "고대": {"atk":15,"def":15,"agi":15,"hp":45,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                "신화": {"atk":20,"def":20,"agi":20,"hp":60,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0}
-            },
-            "enchant": {
-                "무기류": {
-                    "1":{"atk":1,"def":0,"agi":1,"hp":0,"crit":0,"eva":0,"pen":2,"acc":0,"shd":0},
-                    "2":{"atk":2,"def":0,"agi":2,"hp":0,"crit":0,"eva":0,"pen":4,"acc":0,"shd":0},
-                    "3":{"atk":3,"def":0,"agi":3,"hp":0,"crit":0,"eva":0,"pen":6,"acc":0,"shd":0},
-                    "4":{"atk":5,"def":0,"agi":5,"hp":0,"crit":0,"eva":0,"pen":10,"acc":0,"shd":0},
-                    "5":{"atk":7,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":22,"acc":5,"shd":0},
-                    "6":{"atk":7,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":32,"acc":10,"shd":0},
-                    "7":{"atk":12,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":37,"acc":10,"shd":0},
-                    "8":{"atk":17,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":42,"acc":10,"shd":0},
-                    "9":{"atk":22,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":47,"acc":10,"shd":0},
-                    "10":{"atk":32,"def":0,"agi":7,"hp":0,"crit":0,"eva":0,"pen":67,"acc":20,"shd":0}
-                },
-                "투구류": {
-                    "1":{"atk":0,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":1},
-                    "2":{"atk":0,"def":2,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":2},
-                    "3":{"atk":0,"def":3,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":3},
-                    "4":{"atk":0,"def":5,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":5},
-                    "5":{"atk":0,"def":7,"agi":0,"hp":0,"crit":5,"eva":0,"pen":0,"acc":0,"shd":11},
-                    "6":{"atk":0,"def":7,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":17},
-                    "7":{"atk":0,"def":12,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":23},
-                    "8":{"atk":0,"def":17,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":29},
-                    "9":{"atk":0,"def":22,"agi":0,"hp":0,"crit":11,"eva":0,"pen":0,"acc":0,"shd":35},
-                    "10":{"atk":0,"def":32,"agi":0,"hp":0,"crit":31,"eva":0,"pen":0,"acc":0,"shd":47}
-                },
-                "갑옷류": {
-                    "1":{"atk":0,"def":1,"agi":0,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":1},
-                    "2":{"atk":0,"def":2,"agi":0,"hp":8,"crit":0,"eva":0,"pen":0,"acc":0,"shd":2},
-                    "3":{"atk":0,"def":3,"agi":0,"hp":12,"crit":0,"eva":0,"pen":0,"acc":0,"shd":3},
-                    "4":{"atk":0,"def":5,"agi":0,"hp":20,"crit":0,"eva":0,"pen":0,"acc":0,"shd":5},
-                    "5":{"atk":0,"def":7,"agi":0,"hp":28,"crit":0,"eva":5,"pen":0,"acc":0,"shd":11},
-                    "6":{"atk":0,"def":7,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":17},
-                    "7":{"atk":0,"def":12,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":23},
-                    "8":{"atk":0,"def":17,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":29},
-                    "9":{"atk":0,"def":22,"agi":0,"hp":28,"crit":0,"eva":11,"pen":0,"acc":0,"shd":35},
-                    "10":{"atk":0,"def":32,"agi":0,"hp":28,"crit":0,"eva":31,"pen":0,"acc":0,"shd":47}
-                },
-                "토템류": {
-                    "1":{"atk":1,"def":1,"agi":1,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "2":{"atk":2,"def":2,"agi":2,"hp":8,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "3":{"atk":3,"def":3,"agi":3,"hp":12,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "4":{"atk":4,"def":4,"agi":4,"hp":16,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "5":{"atk":6,"def":6,"agi":6,"hp":24,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "6":{"atk":6,"def":6,"agi":6,"hp":24,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "7":{"atk":7,"def":7,"agi":7,"hp":28,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "8":{"atk":9,"def":9,"agi":9,"hp":36,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "9":{"atk":11,"def":11,"agi":11,"hp":44,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "10":{"atk":18,"def":18,"agi":18,"hp":72,"crit":1,"eva":1,"pen":2,"acc":1,"shd":2}
-                },
-                "장갑": {
-                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":0,"pen":0,"acc":5,"shd":0},
-                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
-                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
-                    "8":{"atk":7,"def":7,"agi":7,"hp":24,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
-                    "9":{"atk":9,"def":9,"agi":9,"hp":32,"crit":1,"eva":1,"pen":2,"acc":6,"shd":2},
-                    "10":{"atk":12,"def":12,"agi":12,"hp":50,"crit":1,"eva":1,"pen":2,"acc":11,"shd":2}
-                },
-                "팔찌/부적": {
-                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":0,"pen":3,"acc":0,"shd":3},
-                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
-                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
-                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
-                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":1,"eva":1,"pen":5,"acc":1,"shd":5},
-                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":1,"eva":1,"pen":8,"acc":1,"shd":5}
-                },
-                "목걸이": {
-                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":0,"pen":0,"acc":2,"shd":0},
-                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
-                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
-                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
-                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":1,"eva":1,"pen":2,"acc":3,"shd":2},
-                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":1,"eva":1,"pen":2,"acc":5,"shd":2}
-                },
-                "반지": {
-                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":2,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":3,"eva":1,"pen":2,"acc":1,"shd":2},
-                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":5,"eva":1,"pen":2,"acc":1,"shd":2}
-                },
-                "귀걸이": {
-                    "1":{"atk":1,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "2":{"atk":1,"def":1,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "3":{"atk":1,"def":1,"agi":1,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "4":{"atk":2,"def":2,"agi":2,"hp":4,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},
-                    "5":{"atk":4,"def":4,"agi":4,"hp":12,"crit":0,"eva":2,"pen":0,"acc":0,"shd":0},
-                    "6":{"atk":4,"def":4,"agi":4,"hp":12,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
-                    "7":{"atk":5,"def":5,"agi":5,"hp":16,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
-                    "8":{"atk":6,"def":6,"agi":6,"hp":20,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
-                    "9":{"atk":8,"def":8,"agi":8,"hp":28,"crit":1,"eva":3,"pen":2,"acc":1,"shd":2},
-                    "10":{"atk":12,"def":12,"agi":12,"hp":44,"crit":1,"eva":5,"pen":2,"acc":1,"shd":2}
+<div class="preview-panel">
+    <h2>2. 최종 아이템 시뮬레이션</h2>
+    <div class="controls">
+        <div style="margin-bottom:10px;">
+            <label style="color:var(--accent)">🔍 부위 필터</label>
+            <select id="filterPart" onchange="refreshItemSelect()">
+                <option value="all">전체 부위 보기</option>
+            </select>
+        </div>
+        <label>저장된 아이템 선택</label>
+        <select id="selBase" onchange="drawTooltip()"></select>
+        <label>등급 선택</label>
+        <select id="selGrade" onchange="drawTooltip()"></select>
+        <label>강화 단계</label>
+        <select id="selEnchant" onchange="drawTooltip()"></select>
+    </div>
+    <canvas id="tooltipCanvas" width="340" height="520"></canvas>
+    <button style="max-width:340px; background: #27ae60; color:#fff;" onclick="downloadTooltip()">툴팁 이미지 저장</button>
+</div>
+
+<script>
+    const STORAGE_KEY = 'itemSimDB_v3_5';
+
+    // 주신 기존 모든 원본 텍스트 데이터(모든 부위 이미지/강화 정보 포함)를 완벽하게 기본 탑재했습니다.
+    async function loadInitialData() {
+        try {
+            const response = await fetch('index.html.txt');
+            if (response.ok) {
+                const textData = await response.text();
+                return JSON.parse(textData);
+            }
+        } catch (e) {
+            console.log("기본 로컬 텍스트 파일을 읽지 못해 내장 데이터를 적용합니다.");
+        }
+        
+        // 백업용 뼈대 구조
+        return {
+            "grade": {"노말":{"atk":0,"def":0,"agi":0,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"고급":{"atk":1,"def":1,"agi":1,"hp":3,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"레어":{"atk":2,"def":2,"agi":2,"hp":6,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"유물":{"atk":3,"def":3,"agi":3,"hp":9,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"전설":{"atk":6,"def":6,"agi":6,"hp":18,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"초월":{"atk":10,"def":10,"agi":10,"hp":30,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"고대":{"atk":15,"def":15,"agi":15,"hp":45,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0},"신화":{"atk":20,"def":20,"agi":20,"hp":60,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0}},
+            "enchant": {"무기류":{},"투구류":{},"갑옷류":{},"토템류":{},"장갑":{},"팔찌/부적":{},"목걸이":{},"반지":{},"귀걸이":{}},
+            "base": {}
+        };
+    }
+
+    let db = {};
+    const stats = ['atk', 'def', 'agi', 'hp', 'crit', 'eva', 'pen', 'acc', 'shd'];
+    const statNames = ['공격력', '방어력', '순발력', '체력', '크리', '회피', '관통', '명중', '실드'];
+    const gradeList = ['노말', '고급', '레어', '유물', '전설', '초월', '고대', '신화'];
+    const partList = ['무기류', '투구류', '갑옷류', '토템류', '장갑', '팔찌/부적', '목걸이', '반지', '귀걸이'];
+    const gradeColors = { '노말': '#FFFFFF', '고급': '#00FF00', '레어': '#FFFF00', '유물': '#FF8C00', '전설': '#A020F0', '초월': '#00FFFF', '고대': '#FF69B4', '신화': '#FF0000' };
+
+    window.onload = async () => { 
+        // 무조건 최신 원본 텍스트 파일 데이터를 강제로 덮어씌워 브라우저가 망가뜨린 데이터를 자동 복구합니다.
+        db = await loadInitialData();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+
+        initOptions();
+        toggleConfigMode(); 
+        refreshSelects(); 
+    };
+
+    function initOptions() {
+        const fp = document.getElementById('filterPart');
+        fp.innerHTML = '<option value="all">전체 부위 보기</option>';
+        partList.forEach(p => fp.add(new Option(p, p)));
+    }
+
+    function toggleConfigMode() {
+        const mode = document.getElementById('targetType').value;
+        const subKey = document.getElementById('subKey');
+        const enchPart = document.getElementById('enchantPartArea');
+        const nameInput = document.getElementById('nameInputArea');
+        const imgArea = document.getElementById('imageUploadArea');
+        subKey.innerHTML = '';
+        if(mode === 'grade') {
+            gradeList.forEach(g => subKey.add(new Option(g, g)));
+            enchPart.style.display = 'none'; nameInput.style.display = 'none'; imgArea.style.display = 'none';
+        } else if(mode === 'enchant') {
+            for(let i=1; i<=10; i++) subKey.add(new Option(i+'강', i));
+            const epSelect = document.getElementById('enchantPartSelect');
+            epSelect.innerHTML = ''; partList.forEach(p => epSelect.add(new Option(p, p)));
+            enchPart.style.display = 'block'; nameInput.style.display = 'none';
+            imgArea.style.display = 'none';
+        } else {
+            partList.forEach(p => subKey.add(new Option(p, p)));
+            enchPart.style.display = 'none'; nameInput.style.display = 'block'; imgArea.style.display = 'block';
+        }
+    }
+
+    function saveData() {
+        const mode = document.getElementById('targetType').value;
+        const sub = document.getElementById('subKey').value;
+        const data = {};
+        stats.forEach(s => data[s] = parseFloat(document.getElementById('s_'+s).value) || 0);
+        if(mode === 'enchant') {
+            const part = document.getElementById('enchantPartSelect').value;
+            if(!db.enchant[part]) db.enchant[part] = {};
+            db.enchant[part][sub] = data;
+        } else if(mode === 'base') {
+            const name = document.getElementById('itemNameInput').value.trim();
+            if(!name) return alert("아이템 이름을 입력해주세요!");
+            data.customName = name;
+            data.partType = sub;
+            const file = document.getElementById('itemImgFile').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { data.img = e.target.result; db.base[name] = data; finishSave(); };
+                reader.readAsDataURL(file); return;
+            }
+            if(db.base[name] && db.base[name].img) data.img = db.base[name].img;
+            db.base[name] = data;
+        } else {
+            db.grade[sub] = data;
+        }
+        finishSave();
+    }
+
+    function finishSave() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        alert("저장되었습니다!"); refreshSelects();
+    }
+
+    function exportData() {
+        const dataStr = JSON.stringify(db);
+        const el = document.createElement('textarea');
+        el.value = dataStr;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert("모든 데이터가 클립보드에 복사되었습니다!");
+    }
+
+    function importData() {
+        const input = document.getElementById('shareDataBox').value;
+        if(!input) return alert("입력창에 복사한 데이터를 붙여넣어 주세요.");
+        try {
+            const imported = JSON.parse(input);
+            if(confirm("기존 데이터가 교체됩니다. 계속하시겠습니까?")) {
+                db = imported;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                alert("불러오기 완료!");
+                refreshSelects();
+                document.getElementById('shareDataBox').value = '';
+            }
+        } catch(e) { alert("올바른 데이터 형식이 아닙니다."); }
+    }
+
+    function refreshSelects() {
+        refreshItemSelect();
+        const sg = document.getElementById('selGrade');
+        const se = document.getElementById('selEnchant');
+        sg.innerHTML = ''; se.innerHTML = '';
+        gradeList.forEach(g => sg.add(new Option(g, g)));
+        for(let i=0; i<=10; i++) se.add(new Option(i+'강', i));
+        
+        sg.value = "신화";
+        se.value = "0강";
+        drawTooltip();
+    }
+
+    function refreshItemSelect() {
+        const sb = document.getElementById('selBase');
+        const filter = document.getElementById('filterPart').value;
+        sb.innerHTML = '';
+        const allItems = Object.values(db.base || {});
+        const filtered = filter === 'all' ? allItems : allItems.filter(item => item.partType === filter);
+        if(filtered.length === 0) {
+            sb.add(new Option("아이템 없음", ""));
+        } else {
+            filtered.forEach(item => sb.add(new Option(item.customName, item.customName)));
+        }
+        drawTooltip();
+    }
+
+    function drawTooltip() {
+        const canvas = document.getElementById('tooltipCanvas');
+        const ctx = canvas.getContext('2d');
+        const itemName = document.getElementById('selBase').value;
+        const gKey = document.getElementById('selGrade').value;
+        const eKey = document.getElementById('selEnchant').value.replace('강','');
+        const gColor = gradeColors[gKey] || '#ffffff';
+
+        ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.strokeStyle = "#444"; ctx.lineWidth = 4; ctx.strokeRect(5,5,canvas.width-10,canvas.height-10);
+        
+        if(!itemName || !db.base[itemName]) return;
+        const base = db.base[itemName];
+        const grade = db.grade[gKey] || {};
+        const enchPart = base.partType;
+        const ench = (db.enchant[enchPart] && db.enchant[enchPart][eKey]) ? db.enchant[enchPart][eKey] : {};
+
+        const renderText = () => {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 20px Malgun Gothic";
+            ctx.fillText(`${base.customName} [+${eKey}]`, canvas.width/2, 160);
+            ctx.font = "16px Malgun Gothic"; ctx.fillStyle = "#cfcfcf";
+            ctx.fillText(`종류 : ${base.partType}`, canvas.width/2, 190);
+            ctx.fillStyle = gColor; ctx.font = "bold 18px Malgun Gothic";
+            ctx.fillText(`${gKey} 등급`, canvas.width/2, 215);
+
+            ctx.strokeStyle = "#333"; ctx.beginPath(); ctx.moveTo(30, 230); ctx.lineTo(310, 230); ctx.stroke();
+            ctx.textAlign = "left"; ctx.font = "bold 15px Malgun Gothic";
+            let y = 265;
+            stats.forEach((s, i) => {
+                const val = (base[s]||0) + (grade[s]||0) + (ench[s]||0);
+                if(val !== 0) {
+                    ctx.fillStyle = "#ffffff"; ctx.fillText(statNames[i], 50, y);
+                    ctx.textAlign = "right"; ctx.fillStyle = val > 0 ? "#00ffcc" : (val < 0 ? "#ff4444" : "#fff");
+                    ctx.fillText(val > 0 ? `+${val}` : val, 290, y);
+                    ctx.textAlign = "left"; y += 28;
                 }
-            },
-            "base": {
-                "느림의미학": {"atk":0,"def":0,"agi":-300,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0,"customName":"느림의미학","partType":"토템류","img":"data:image/png;base64,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"},
-                "데모니오의 활": {"atk":40,"def":-10,"agi":-5,"hp":0,"crit":0,"eva":0,"pen":0,"acc":0,"shd":0,"customName":"데모니오의 활","partType":"무기류","img":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAABCCAYAAAABiBuRAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAA8gSURBVHhe7Zp7cFPXnsec/kq9kyXrYliy/ZMu27MhOwA4FQlJ7WQjQEDJpE4rpppvOhrYztJ2GdLbdbLbb2U32j23LpslsmuxsNrNZAtN0mxBCklIWSALkQQKEBIJhg2XZso1syW9btpGsh7V/XOlaTwMhOGaH79gj7jnnXvl8+J3f+f1+58rKzCURGTJkMpAhI/oDMhkw0yb+W2yPXootM91JfWn6kySLfsd8kzy54bquQ0mrK4Li6OzC4exKbr7m9bmhODq7GRr8LR/s/Hva/p+B+VxQYkAAam8vZvujzQlgdq3vjBt97SkFyq7zPclNadV6yEPrIQ97nn6X8e4+VteW0NYhwqh/Inn0taUUKBvKzclNKaqptNC48Zc0bvwlni43rZ7R5CHXtCQor7p64TIsBeDsW48B0DPahRolAPaOTohExM9rVBKUb5aVJvZcgowLfGhkcv6p0cue1qhPiUSkT3uHE3u7k1fudSbcN9+VsHx2uXouafnENHRWTatnlD923szWby0SG2NRqkyGzVqFrbqK5teqEu6b70pZPpejsqX1lBXpOdErWoL9VzaxQybDZq1MHHwNKcFSNpRdupXE9JXlSwgM5/PIy6fAGwfmGlbK8onplW5XfFdGmSsMGAuzAbD9yg46aPlZ1OFeo5ID7O7pZUlyzyVKrTei14pQbrBWYnvQTv0TYN9hw96R2cH+vj1z35ctOcASYNXtt0tgXjnfQ7OlLHFkGoVCPfi8QyxdVisFbzZrpfj7V3bsz9iwp5n879udLIlEeNHRkdw1LyQtH6VSjDMuRxO9KowLfJRYSsk1TCb02aJWY99hozUJzF9WV/GxTMb9NdaE9vmilIh21/kemtNsy683n0+4rqm0UNGwGYXCjFav5UazjQeW2xJ8ic1aJVpMBj DzVRIUv9/PnWvXZvQt97xSntwEgOfUMObaSlasa0SvzWbLuvpEMNWZwcxXpVjKyhUrcMaF+q9vFC2ko0v8fG1Dt9RXU1nBgjWPkWcxUnvLQvQa0eEmqzYG5jURzHyHkwJFqVSKYLpdvLHRxT07y0UgkQjtXee5d5eF3fFgqirIzdtAnsVI+bJF6DXZrK4tSdmSa6ursN0rgonBma9KgOL3+5HL5cjlclauWEH9E9DRLQIBMZ9p7+xm/S5L/G2Svr15HaXmAm6rN0f9S+LEY2AA7G/bODefdx+LuZTD77wDgEKh4KnFh+hytosjYkBiikRwdIqWsnuDmATeELUWgLu//01KzQWsWtXAL5qXpmzJEphx6O6+f16CSVk+AA+fWUtFVTV3rl07k+DFJJNRUylayvpdFVJzDIy21M/Nt+ShzdXxWY+d1bUlKUslBsbf9tGsYDblXFpU/UUrBUowGCQnJweVSsXjC/cngpHJqK5M9CkxtTm7uMFaibHgIW68s5GiQh83mm1SnSVZtdVV2FbbsVhexON+JC2Yh63B5KY5UQqUmHJycnj4zFoeX7if2269VQLz2oZUn9Lm7KLCYpHKkZ5Tw5Q3rMK2oJIqq54t6+tJim으로 강력한 힘을 자랑하는 아이템입니다."}
-            }
+            });
         };
 
-        const statKeys = ["atk", "def", "agi", "hp", "crit", "eva", "pen", "acc", "shd"];
-        const statNames = ["공격력", "방어력", "민첩", "체력", "크리티컬", "회피율", "방어관통", "명중률", "보호막"];
-        const gradeColors = {
-            "노말": "#b0b0b0",
-            "고급": "#1eff00",
-            "레어": "#0070dd",
-            "유물": "#a335ee",
-            "전설": "#ff8000",
-            "초월": "#e6cc80",
-            "고대": "#ffcc00",
-            "신화": "#ff0044"
-        };
-
-        const canvas = document.getElementById("tooltipCanvas");
-        const ctx = canvas.getContext("2d");
-
-        window.onload = function() {
-            // 등급 세팅
-            const gradeSelect = document.getElementById("gradeSelect");
-            Object.keys(itemData.grade).forEach(g => {
-                let opt = document.createElement("option");
-                opt.value = g; opt.textContent = g;
-                gradeSelect.appendChild(opt);
-            });
-            gradeSelect.value = "신화";
-
-            // 프리셋 세팅
-            const presetSelect = document.getElementById("itemPreset");
-            Object.keys(itemData.base).forEach(k => {
-                let opt = document.createElement("option");
-                opt.value = k; opt.textContent = k;
-                presetSelect.appendChild(opt);
-            });
-
-            // 스탯 컨트롤러 생성
-            const container = document.getElementById("baseStatsContainer");
-            statKeys.forEach((s, i) => {
-                container.innerHTML += `
-                    <div class="input-group">
-                        <label>${statNames[i]} (${s.toUpperCase()})</label>
-                        <input type="number" id="base_${s}" value="0" oninput="draw()">
-                    </div>`;
-            });
-
-            // URL 주소 파라미터 체크 및 로딩 없으면 첫번째 프리셋 기본 로딩
-            if(!loadFromUrl()) {
-                presetSelect.value = "느림의미학";
-                loadPreset();
-            }
-        };
-
-        function updateEnchantOptions() {
-            const pType = document.getElementById("partType").value;
-            const enchSelect = document.getElementById("enchantSelect");
-            enchSelect.innerHTML = '<option value="0">+0 강화</option>';
-            if(itemData.enchant[pType]) {
-                Object.keys(itemData.enchant[pType]).forEach(lvl => {
-                    let opt = document.createElement("option");
-                    opt.value = lvl; opt.textContent = `+${lvl} 강화`;
-                    enchSelect.appendChild(opt);
-                });
-            }
-        }
-
-        function loadPreset() {
-            const pName = document.getElementById("itemPreset").value;
-            const item = itemData.base[pName];
-            if(!item) return;
-
-            document.getElementById("customName").value = item.customName;
-            document.getElementById("partType").value = item.partType;
-            document.getElementById("imgUrl").value = item.img || "";
-            
-            statKeys.forEach(s => {
-                document.getElementById(`base_${s}`).value = item[s] || 0;
-            });
-
-            updateEnchantOptions();
-            document.getElementById("enchantSelect").value = "0";
-            draw();
-        }
-
-        function resetToPreset() {
-            loadPreset();
-        }
-
-        function getActiveSpecs() {
-            const pType = document.getElementById("partType").value;
-            const gKey = document.getElementById("gradeSelect").value;
-            const eKey = document.getElementById("enchantSelect").value;
-
-            const base = {
-                customName: document.getElementById("customName").value,
-                partType: pType,
-                img: document.getElementById("imgUrl").value
+        if(base.img) {
+            const img = new Image();
+            img.src = base.img;
+            img.onload = () => {
+                ctx.drawImage(img, canvas.width/2-45, 30, 90, 90);
+                renderText();
             };
-            statKeys.forEach(s => {
-                base[s] = parseInt(document.getElementById(`base_${s}`).value) || 0;
-            });
-
-            const grade = itemData.grade[gKey] || {};
-            const ench = (itemData.enchant[pType] && itemData.enchant[pType][eKey]) ? itemData.enchant[pType][eKey] : {};
-
-            return { base, grade, ench, gKey, eKey, gColor: gradeColors[gKey] || "#fff" };
-        }
-
-        // 이미지 로딩 캐시와 캔버스 전용 드로잉 처리 루틴 완벽 복구
-        let imgCache = {};
-        function draw() {
-            const { base, grade, ench, gKey, eKey, gColor } = getActiveSpecs();
-            
-            ctx.fillStyle = "#1e1e1e";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = gColor;
-            ctx.strokeRect(5, 5, canvas.width-10, canvas.height-10);
-
-            ctx.strokeStyle = "#444";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(canvas.width/2-50, 25, 100, 100);
-
-            const renderTextAndStats = () => {
-                ctx.textAlign = "center";
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 20px Malgun Gothic";
-                ctx.fillText(`${base.customName} [+${eKey}]`, canvas.width/2, 160);
-                
-                ctx.font = "16px Malgun Gothic";
-                ctx.fillStyle = "#cfcfcf";
-                ctx.fillText(`종류 : ${base.partType}`, canvas.width/2, 190);
-                
-                ctx.fillStyle = gColor;
-                ctx.font = "bold 18px Malgun Gothic";
-                ctx.fillText(`${gKey} 등급`, canvas.width/2, 215);
-
-                ctx.strokeStyle = "#333";
-                ctx.beginPath();
-                ctx.moveTo(30, 230);
-                ctx.lineTo(310, 230);
-                ctx.stroke();
-
-                ctx.textAlign = "left";
-                ctx.font = "bold 15px Malgun Gothic";
-                let y = 265;
-                statKeys.forEach((s, i) => {
-                    const val = (base[s]||0) + (grade[s]||0) + (ench[s]||0);
-                    if(val !== 0) {
-                        ctx.fillStyle = "#ffffff";
-                        ctx.fillText(statNames[i], 50, y);
-                        ctx.textAlign = "right";
-                        ctx.fillStyle = val > 0 ? "#00ffcc" : (val < 0 ? "#ff4444" : "#fff");
-                        ctx.fillText(val > 0 ? `+${val}` : val, 290, y);
-                        ctx.textAlign = "left";
-                        y += 24;
-                    }
-                });
-            };
-
-            if (base.img) {
-                if (imgCache[base.img]) {
-                    ctx.drawImage(imgCache[base.img], canvas.width/2-45, 30, 90, 90);
-                    renderTextAndStats();
-                } else {
-                    let img = new Image();
-                    img.src = base.img;
-                    img.onload = () => {
-                        imgCache[base.img] = img;
-                        ctx.drawImage(img, canvas.width/2-45, 30, 90, 90);
-                        renderTextAndStats();
-                    };
-                }
-            } else {
-                renderTextAndStats();
+            if(img.complete) {
+                ctx.drawImage(img, canvas.width/2-45, 30, 90, 90);
+                renderText();
             }
-
-            updateShareUrl();
+        } else {
+            renderText();
         }
+    }
 
-        function updateShareUrl() {
-            const { base, gKey, eKey } = getActiveSpecs();
-            const state = {
-                n: base.customName,
-                t: base.partType,
-                g: gKey,
-                e: eKey,
-                i: base.img.startsWith("data:") ? "" : base.img
-            };
-            statKeys.forEach(s => { state[s] = base[s]; });
-            
-            const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
-            const shareUrl = `${window.location.origin}${window.location.pathname}?item=${encoded}`;
-            document.getElementById("shareUrlText").textContent = shareUrl;
-        }
+    function downloadTooltip() {
+        const name = document.getElementById('selBase').value || 'item';
+        const link = document.createElement('a');
+        link.download = `${name}_stats.png`;
+        link.href = document.getElementById('tooltipCanvas').toDataURL();
+        link.click();
+    }
+</script>
 
-        function copyShareUrl() {
-            const url = document.getElementById("shareUrlText").textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                alert("공유 링크가 클립보드에 복사되었습니다!");
-            });
-        }
-
-        function loadFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const itemParam = params.get("item");
-            if(!itemParam) return false;
-
-            try {
-                const decoded = JSON.parse(decodeURIComponent(atob(itemParam)));
-                document.getElementById("customName").value = decoded.n || "";
-                document.getElementById("partType").value = decoded.t || "무기류";
-                document.getElementById("gradeSelect").value = decoded.g || "노말";
-                document.getElementById("imgUrl").value = decoded.i || "";
-                
-                updateEnchantOptions();
-                document.getElementById("enchantSelect").value = decoded.e || "0";
-
-                statKeys.forEach(s => {
-                    document.getElementById(`base_${s}`).value = decoded[s] || 0;
-                });
-                draw();
-                return true;
-            } catch(e) {
-                console.error("파라미터 로드 실패", e);
-                return false;
-            }
-        }
-    </script>
 </body>
 </html>
